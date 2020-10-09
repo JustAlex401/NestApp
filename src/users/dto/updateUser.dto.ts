@@ -1,22 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateUserDto {
+export class UpdateUserDto {
     readonly _id: string;
 
     @ApiProperty({
         type: String,
-        required: true,
         maxLength : 20,
     })
     @IsString()
-    @IsNotEmpty()
-    readonly firstName: string;
+    @IsOptional()
+    readonly firstName?: string;
 
     @ApiProperty({
         type: String,
         maxLength : 30,
-        required: false,
     })
     @IsString()
     @IsOptional()
@@ -26,17 +24,15 @@ export class CreateUserDto {
         type: Number,
         minimum: 0,
         maximum: 120,
-        required: true,
     })
     @IsNumber()
-    @IsNotEmpty()
-    readonly age: number;
+    @IsOptional()
+    readonly age?: number;
 
     @ApiProperty({
-        required: true,
         type: [String],
     })
     @IsArray()
-    @IsNotEmpty()
-    readonly hobbies: string[];
+    @IsOptional()
+    readonly hobbies?: string[];
 }

@@ -1,9 +1,10 @@
-import { Controller, Post, Response, Body, HttpStatus, Get, Param, Delete, Patch, BadRequestException, UseFilters, UseInterceptors, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, Patch, BadRequestException, UseFilters, UseInterceptors, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiBody, ApiCreatedResponse, ApiHeader, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/createUser.dto';
 import { HttpExceptionFilter } from '../common/exception-filter/http-exception.filter';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @UseInterceptors(LoggingInterceptor)
 @Controller('users')
@@ -13,29 +14,27 @@ export class UsersController {
     @Post()
     @UseFilters(HttpExceptionFilter)
     @ApiBody({type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'The record has been successfully created.' })
-    @ApiResponse({ status: 400, description: 'Bad Request.' })
-    public async createUser(@Response() res, @Body() createUserDto: CreateUserDto) {
-            const user = await this.userService.create(createUserDto)
-            .catch((err) => {
-                throw new BadRequestException(err.message);
-            });
-            res.setHeader('Location', '/user/' + user._id);
-            return res.status(HttpStatus.CREATED).json(user);
+    public async createUser(@Body() createUserDto: CreateUserDto) {
+        const result = await this.userService.create(createUserDto);
 
+        if(result instanceof Error){
+            throw new BadRequestException('Bad request');
+        }
+        
+        return result;
     }
     
     @Get()
     @UseFilters(HttpExceptionFilter)
-    @ApiResponse({ status: 200, description: 'OK' })
-    @ApiResponse({ status: 404, description: 'Not found' })
-    public async getUsers(@Response() res) {
-        const users = await this.userService.findAll().catch(err => {
-            throw new NotFoundException(err.message)
-        });
-        return res.status(HttpStatus.OK).json(users);
-    }
+    public async getUsers() {
+        const result = await this.userService.findAll();
 
+        if(result instanceof Error){
+            throw new NotFoundException('Not found');
+        }
+
+        return result;
+    }
 
     @Get('/:id')
     @ApiParam({
@@ -44,15 +43,15 @@ export class UsersController {
         description: "Users id"
     })
     @UseFilters(HttpExceptionFilter)
-    @ApiResponse({ status: 200, description: 'OK' })
-    @ApiResponse({ status: 400, description: 'Bad Request Exception' })
-    public async getUserById(@Response() res, @Param('id') id:string){
-        const user = await this.userService.findById(id).catch(err => {
-            throw new BadRequestException(err.message)
-        });
-        return res.status(HttpStatus.OK).json(user);
-    }
+    public async getUserById(@Param('id') id:string){
+        const result = await this.userService.findById(id);
 
+        if(result instanceof Error){
+            throw new NotFoundException('Not found');
+        }
+
+        return result;
+    }
 
     @Delete('/:id')
     @ApiParam({
@@ -61,12 +60,14 @@ export class UsersController {
         description: "Users id"
     })
     @UseFilters(HttpExceptionFilter)
-    @ApiResponse({ status: 204, description: 'No content' })
-    public async deleteUser(@Param('id') id:string, @Response() res) {
-        const user = await this.userService.delete(id).catch(err => {
-            throw new BadRequestException(err.message);
-        });
-        return res.status(HttpStatus.OK).json(user);
+    public async deleteUser(@Param('id') id:string) {
+        const result = await this.userService.delete(id);
+
+        if(result instanceof Error){
+            throw new NotFoundException('Not found');
+        }
+
+        return result;
     }
 
     @Patch('/:id')
@@ -75,15 +76,15 @@ export class UsersController {
         type: "string",
         description: "Users id"
     })
-    @ApiBody({type: CreateUserDto })
+    @ApiBody({type: UpdateUserDto })
     @UseFilters(HttpExceptionFilter)
-    @ApiResponse({ status: 200, description: 'OK' })
-    @ApiResponse({ status: 400, description: 'Bad Request.' })
-    public async updateUser(@Param('id') id: string, @Response() res, @Body() createUserDto: CreateUserDto){
-        const user = await this.userService.update(id, createUserDto).catch(err => {
-            throw new BadRequestException(err.message);
-        });
-        return res.status(HttpStatus.OK).json(user);
+    public async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto){
+        const result = await this.userService.update(id, updateUserDto);
+
+        if(result instanceof Error){
+            throw new BadRequestException('Bad request');
+        }
+        
+        return result;
     }
-    
 }

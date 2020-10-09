@@ -3,7 +3,6 @@ import * as mongoose from 'mongoose';
 mongoose.set('useFindAndModify', false);
 
 export const UserSchema = new mongoose.Schema({
-  
   firstName : {
     type: String,
     required: true,
@@ -27,5 +26,4 @@ export const UserSchema = new mongoose.Schema({
     type: [String],
     required: true
   },
-},
- );
+})
